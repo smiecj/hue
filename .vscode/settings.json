@@ -1,0 +1,9 @@
+{
+    "python.analysis.extraPaths": [
+        "./desktop/libs/librdbms/src",
+        "./apps/beeswax/src",
+        "./desktop/core/src",
+        "./apps/beeswax/gen-py",
+        "./desktop/core/ext-py/tablib-0.10.0"
+    ]
+}

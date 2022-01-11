@@ -19,10 +19,64 @@ from librdbms.jdbc import query_and_fetch
 
 from notebook.connectors.jdbc import JdbcApi
 from notebook.connectors.jdbc import Assist
+from notebook.connectors.base import AuthenticationRequired
+
+import logging
+LOG = logging.getLogger(__name__)
+
 class JdbcApiClickhouse(JdbcApi):
 
   def _createAssist(self, db):
     return ClickhouseAssist(db)
+
+  def fetch_result(self, notebook, snippet, rows, start_over):
+    return {}
+
+  def autocomplete(self, snippet, database=None, table=None, column=None, nested=None):
+    if self.db is None:
+      raise AuthenticationRequired()
+
+    assist = self._createAssist(self.db)
+    response = {'status': -1}
+
+    if database is None:
+      response['databases'] = assist.get_databases()
+    elif table is None:
+      tables = assist.get_tables_full(database)
+      response['tables'] = [table['name'] for table in tables]
+      response['tables_meta'] = tables
+    else:
+      columns = assist.get_columns_full(database, table)
+      response['columns'] = [col['name'] for col in columns]
+      response['extended_columns'] = columns
+
+    response['status'] = 0
+    return response
+
+  def download(self, notebook, snippet, file_format='csv'):
+    from beeswax import data_export
+    from desktop.lib import export_csvxls
+    from beeswax import conf
+    from notebook.connectors.base import _get_snippet_name
+    import json
+
+    file_name = _get_snippet_name(notebook)
+    max_rows = conf.DOWNLOAD_ROW_LIMIT.get()
+    result_wrapper = ClickHouseDataWrapper(self, notebook, snippet, max_rows)
+
+    generator = export_csvxls.create_generator(result_wrapper, file_format)
+    resp = export_csvxls.make_response(generator, file_format, file_name)
+    id = snippet['id']
+    if id:
+      resp.set_cookie(
+        'download-%s' % id,
+        json.dumps({
+          'truncated': False,
+          'row_counter': result_wrapper.num_cols
+        }),
+        max_age=data_export.DOWNLOAD_COOKIE_AGE
+      )
+    return resp
 
 class ClickhouseAssist(Assist):
 
@@ -41,3 +95,34 @@ class ClickhouseAssist(Assist):
   def get_sample_data(self, database, table, column=None):
     column = column or '*'
     return query_and_fetch(self.db, 'SELECT %s FROM %s.%s limit 100' % (column, database, table))
+
+class ClickHouseDataWrapper:
+
+  def __init__(self, db, notebook, snippet, max_rows=-1):
+    self.db = db
+    self.notebook = notebook
+    self.snippet = snippet
+    self.first_fetched = True
+
+    # max_rows current not used
+    self.max_rows = max_rows
+    self.limit_rows = max_rows > -1
+
+    self.num_cols = 0
+
+  def __iter__(self):
+    return self
+
+  def next(self):
+    if self.first_fetched:
+      result = self.db.execute(self.notebook, self.snippet)
+
+      headers = [meta['name'] for meta in result['result']['meta']]
+      datas = [data for data in result['result']['data']]
+      self.num_cols = len(result['result']['data'])
+
+      self.first_fetched = False
+
+      return headers, datas
+    else:
+      raise StopIteration
