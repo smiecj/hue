@@ -510,7 +510,7 @@ from desktop.views import _ko
       <!-- ko template: 'assist-hdfs-header-actions' --><!-- /ko -->
     </div>
     <div class="assist-flex-search">
-      <div class="assist-filter"><input class="clearable" type="text" placeholder="${ _('Filter...') }" data-bind="clearable: filter, value: filter, valueUpdate: 'afterkeydown'"/></div>
+      <div class="assist-filter"><input type="password" style="display: none;"/><input class="clearable" type="text" placeholder="${ _('Filter...') }" data-bind="clearable: filter, value: filter, valueUpdate: 'afterkeydown'"/></div>
     </div>
     <div class="assist-flex-fill assist-hdfs-scrollable" data-bind="delayedOverflow">
       <div data-bind="visible: ! loading() && ! hasErrors()" style="position: relative;">

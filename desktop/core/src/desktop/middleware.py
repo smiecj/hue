@@ -44,7 +44,8 @@ import django.views.static
 
 import desktop.views
 import desktop.conf
-from desktop.conf import IS_EMBEDDED
+import django_prometheus
+from desktop.conf import IS_EMBEDDED, ENABLE_PROMETHEUS
 from desktop.context_processors import get_app_name
 from desktop.lib import apputil, i18n, fsmanager
 from desktop.lib.django_util import JsonResponse, render, render_json
@@ -69,6 +70,9 @@ DJANGO_VIEW_AUTH_WHITELIST = [
   desktop.views.is_alive,
 ]
 
+
+if ENABLE_PROMETHEUS.get():
+  DJANGO_VIEW_AUTH_WHITELIST.append(django_prometheus.exports.ExportToDjangoView)
 
 class AjaxMiddleware(object):
   """

@@ -1719,6 +1719,13 @@ TASK_SERVER = ConfigSection(
     ),
 ))
 
+# support prometheus interface
+ENABLE_PROMETHEUS = Config(
+  key='enable_prometheus',
+  default=False,
+  type=coerce_bool,
+  help=_('Turn on Prometheus metrics end point /metrics.')
+)
 
 def get_clusters(user):
   clusters = []

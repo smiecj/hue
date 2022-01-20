@@ -38,3 +38,7 @@ global_registry().gauge_callback(
     description='Number of users that were active in the last hour',
     numerator='users',
 )
+
+
+prometheus_active_users = Gauge('hue_active_users', 'Hue Active Users in All Instances')
+prometheus_active_users.set_function(active_users)

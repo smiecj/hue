@@ -606,6 +606,11 @@ if not desktop.conf.DATABASE_LOGGING.get():
 # For performance reasons and to avoid searching in huge fields, we also truncate to a max length
 DOCUMENT2_SEARCH_MAX_LENGTH = 2000
 
+PROMETHEUS_EXPORT_MIGRATIONS = False # Needs to be there even when enable_prometheus is not enabled
+if desktop.conf.ENABLE_PROMETHEUS.get():
+  MIDDLEWARE_CLASSES.insert(0, 'django_prometheus.middleware.PrometheusBeforeMiddleware')
+  MIDDLEWARE_CLASSES.append('django_prometheus.middleware.PrometheusAfterMiddleware')
+
 # To avoid performace issue, config check will display warning when Document2 over this size
 DOCUMENT2_MAX_ENTRIES = 100000
 

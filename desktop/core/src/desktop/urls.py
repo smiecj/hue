@@ -36,7 +36,7 @@ from django.contrib import admin
 from django.views.static import serve
 
 from desktop import appmanager
-from desktop.conf import METRICS, USE_NEW_EDITOR, ENABLE_DJANGO_DEBUG_TOOL, CONNECTORS, ANALYTICS
+from desktop.conf import METRICS, USE_NEW_EDITOR, ENABLE_DJANGO_DEBUG_TOOL, CONNECTORS, ANALYTICS, ENABLE_PROMETHEUS
 
 from desktop.auth import views as desktop_auth_views
 from desktop.settings import is_oidc_configured
@@ -206,6 +206,11 @@ if ANALYTICS.IS_ENABLED.get():
 dynamic_patterns += [
   url(r'^admin/?', include(admin.site.urls)),
 ]
+
+if ENABLE_PROMETHEUS.get():
+  dynamic_patterns += [
+    re_path('', include('django_prometheus.urls')),
+  ]
 
 static_patterns = []
 

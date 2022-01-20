@@ -1,0 +1,27 @@
+language: python
+python:
+  - "3.6"
+  - "2.7"
+env:
+  - DJANGO_VERSION=2.0
+  - DJANGO_VERSION=1.11
+  - DJANGO_VERSION=1.8
+services:
+  - memcached
+  - redis
+  - mysql
+  - postgresql
+matrix:
+  exclude:
+    - python: "2.7"
+      env: DJANGO_VERSION=2.0
+
+install:
+  - pip install -r requirements.txt
+  - pip install -q Django==$DJANGO_VERSION
+  - mysql -e 'create database django_prometheus_1;'
+before_script:
+  - pep8 .
+script:
+  - python setup.py test
+  - (cd django_prometheus/tests/end2end; PYTHONPATH=../../.. python manage.py test)
