@@ -62,7 +62,7 @@ class JdbcApiClickhouse(JdbcApi):
 
     file_name = _get_snippet_name(notebook)
     max_rows = conf.DOWNLOAD_ROW_LIMIT.get()
-    result_wrapper = ClickHouseDataWrapper(self, notebook, snippet, max_rows)
+    result_wrapper = JdbcDataWrapper(self, notebook, snippet, max_rows)
 
     generator = export_csvxls.create_generator(result_wrapper, file_format)
     resp = export_csvxls.make_response(generator, file_format, file_name)
@@ -96,10 +96,10 @@ class ClickhouseAssist(Assist):
     column = column or '*'
     return query_and_fetch(self.db, 'SELECT %s FROM %s.%s limit 100' % (column, database, table))
 
-class ClickHouseDataWrapper:
+class JdbcDataWrapper:
 
-  def __init__(self, db, notebook, snippet, max_rows=-1):
-    self.db = db
+  def __init__(self, api, notebook, snippet, max_rows=-1):
+    self.api = api
     self.notebook = notebook
     self.snippet = snippet
     self.first_fetched = True
@@ -115,14 +115,19 @@ class ClickHouseDataWrapper:
 
   def next(self):
     if self.first_fetched:
-      result = self.db.execute(self.notebook, self.snippet)
+      LOG.info("[debug] current sql: {}, ready to query data, max count: {}".format(self.snippet['statement'], self.max_rows))
+      datas, description = query_and_fetch(self.api.db, self.snippet['statement'], self.max_rows)
+      LOG.info("[debug] current sql: {}, query data finish: {}".format(self.snippet['statement'], len(datas)))
+      ret_headers = []
+      ret_datas = []
 
-      headers = [meta['name'] for meta in result['result']['meta']]
-      datas = [data for data in result['result']['data']]
-      self.num_cols = len(result['result']['data'])
+      if datas is not None:
+        ret_headers = [col[0] for col in description]
+        ret_datas = [data for data in datas]
+        self.num_cols = len(datas)
 
       self.first_fetched = False
 
-      return headers, datas
+      return ret_headers, ret_datas
     else:
       raise StopIteration
