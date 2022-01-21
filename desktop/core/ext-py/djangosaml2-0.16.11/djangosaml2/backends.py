@@ -230,7 +230,8 @@ class Saml2Backend(ModelBackend):
                     if callable(user_attr):
                         modified = user_attr(attr_value_list)
                     else:
-                        modified = self._set_attribute(user, attr, attr_value_list[0])
+                        actual_user_name = attr_value_list[0].replace(" ", "_")
+                        modified = self._set_attribute(user, attr, actual_user_name)
 
                     user_modified = user_modified or modified
                 else:
