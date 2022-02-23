@@ -17,6 +17,7 @@
 import logging
 
 from datetime import datetime, timedelta
+from prometheus_client import Gauge
 
 from desktop.lib.metrics import global_registry
 
