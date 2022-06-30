@@ -133,7 +133,7 @@ class Cursor():
     while self.rs.next() and (n is None or n > 0):
       row = []
       for c in xrange(self._meta.getColumnCount()):
-        cell = self.rs.getObject(c + 1)
+        cell = self.rs.getString(c + 1)
 
         if isinstance(cell, JavaObject):
           cell = str(cell) # DATETIME
