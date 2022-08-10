@@ -6,6 +6,8 @@
         "./apps/beeswax/gen-py",
         "./desktop/core/ext-py/tablib-0.10.0",
         "./desktop/core/ext-py/client_python-0.7.1",
-        "./desktop/core/ext-py/django-prometheus-1.0.15"
+        "./desktop/core/ext-py/django-prometheus-1.0.15",
+        "./desktop/libs/libsaml/src",
+        "./desktop/core/ext-py/djangosaml2-0.16.11"
     ]
 }

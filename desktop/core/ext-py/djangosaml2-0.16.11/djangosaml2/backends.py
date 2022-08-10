@@ -24,6 +24,8 @@ from django.core.exceptions import (
 
 from djangosaml2.signals import pre_user_save
 
+from desktop.conf import AUTH
+
 
 logger = logging.getLogger('djangosaml2')
 
@@ -172,6 +174,9 @@ class Saml2Backend(ModelBackend):
         if created:
             logger.debug('New user created')
             user = self.configure_user(user, attributes, attribute_mapping)
+            # create ranger user & add hive config
+            if AUTH.RANGER_UPLOAD_NEW_USER:
+                logger.info("[SAML2Backend] add new user to ranger")
         else:
             logger.debug('User updated')
             user = self.update_user(user, attributes, attribute_mapping)
