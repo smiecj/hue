@@ -68,6 +68,8 @@ from django.utils.encoding import force_str
 
 from django_auth_ldap.config import ConfigurationWarning, LDAPGroupQuery, LDAPSearch, _LDAPConfig
 
+from desktop.conf import AUTH
+from ranger_client import Client, Job
 
 logger = _LDAPConfig.get_logger()
 
@@ -101,6 +103,11 @@ class LDAPBackend(object):
 
     # Default settings to override the built-in defaults.
     default_settings = {}
+    
+    def __init__(self):
+        if AUTH.RANGER_UPLOAD_NEW_USER.get():
+            self._client = Client(AUTH.RANGER_ADDRESS.get(), AUTH.RANGER_ADMIN_USER.get(), AUTH.RANGER_ADMIN_PASSWORD.get())
+            self._job = Job(self._client)
 
     def __getstate__(self):
         """
@@ -151,7 +158,7 @@ class LDAPBackend(object):
             user = None
 
         return user
-
+    
     def get_user(self, user_id):
         user = None
 
@@ -623,6 +630,16 @@ class _LDAPUser(object):
             logger.debug("Creating Django user {}".format(username))
             self._user.set_unusable_password()
             save_user = True
+            
+            ## ranger
+            if AUTH.RANGER_UPLOAD_NEW_USER.get():
+                logger.info("[LDAPBackend] add new user to ranger: {}".format(username))
+                ## get policy and check whether current user exists in ranger
+                ### default password: + "_123"
+                try:
+                    self.backend._job.save_user_to_policy(username, '{}_123'.format(username), AUTH.RANGER_SERVICE_NAME.get(), AUTH.RANGER_POLICY_NAME.get(), AUTH.RANGER_MAIN_USER.get())
+                except Exception as e:
+                    logger.warn("[LDAPBackend] add new user failed: {}, reason: {}".format(username, e))
 
         if should_populate:
             logger.debug("Populating Django user {}".format(username))

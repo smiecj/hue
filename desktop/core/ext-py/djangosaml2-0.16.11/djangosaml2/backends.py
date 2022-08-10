@@ -24,10 +24,11 @@ from django.core.exceptions import (
 
 from djangosaml2.signals import pre_user_save
 
-from desktop.conf import AUTH
-
 
 logger = logging.getLogger('djangosaml2')
+
+from desktop.conf import AUTH
+from ranger_client import Client, Job
 
 
 def get_model(model_path):
@@ -62,6 +63,12 @@ def get_saml_user_model():
 
 
 class Saml2Backend(ModelBackend):
+    
+    def __init__(self):
+        super(Saml2Backend, self).__init__()
+        if AUTH.RANGER_UPLOAD_NEW_USER.get():
+            self._client = Client(AUTH.RANGER_ADDRESS.get(), AUTH.RANGER_ADMIN_USER.get(), AUTH.RANGER_ADMIN_PASSWORD.get())
+            self._job = Job(self._client)
 
     def authenticate(self, request, session_info=None, attribute_mapping=None,
                      create_unknown_user=True, **kwargs):
@@ -174,9 +181,15 @@ class Saml2Backend(ModelBackend):
         if created:
             logger.debug('New user created')
             user = self.configure_user(user, attributes, attribute_mapping)
-            # create ranger user & add hive config
-            if AUTH.RANGER_UPLOAD_NEW_USER:
-                logger.info("[SAML2Backend] add new user to ranger")
+
+            ## ranger
+            if AUTH.RANGER_UPLOAD_NEW_USER.get():
+                logger.info("[LDAPBackend] add new user to ranger: {}".format(main_attribute))
+                try:
+                    self._job.save_user_to_policy(main_attribute, '{}_123'.format(main_attribute), AUTH.RANGER_SERVICE_NAME.get(), AUTH.RANGER_POLICY_NAME.get(), AUTH.RANGER_MAIN_USER.get())
+                except Exception as e:
+                    logger.warn("[LDAPBackend] add new user failed: {}, reason: {}".format(main_attribute, e))
+                
         else:
             logger.debug('User updated')
             user = self.update_user(user, attributes, attribute_mapping)

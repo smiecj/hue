@@ -1082,43 +1082,43 @@ AUTH = ConfigSection(
     RANGER_UPLOAD_NEW_USER = Config(
       key="ranger_upload_new_user",
       help=_("If True, login with new user will create new user on ranger"),
-      type=coerce_bool,
+      type=bool,
       default=False,
     ),
     RANGER_ADDRESS = Config(
       key="ranger_address",
       help=_("ranger inner net address"),
-      type=coerce_string,
+      type=str,
       default="",
     ),
     RANGER_ADMIN_USER = Config(
       key="ranger_admin_user",
       help=_("ranger admin user"),
-      type=coerce_string,
+      type=str,
       default="",
     ),
     RANGER_ADMIN_PASSWORD = Config(
       key="ranger_admin_password",
-      type=coerce_string,
+      type=str,
       private=True,
       default="",
     ),
-    RANGER_POLICIES_NAME = Config(
-      key="ranger_policies_name",
-      help=_("ranger to modify policies name, e.g. emr_mbzph8an_hive"),
-      type=coerce_string,
+    RANGER_SERVICE_NAME = Config(
+      key="ranger_service_name",
+      help=_("ranger to modify service name, e.g. hive"),
+      type=str,
       default="",
     ),
     RANGER_POLICY_NAME = Config(
       key="ranger_policy_name",
       help=_("ranger to modify policies name, e.g. all - database, table, column"),
-      type=coerce_string,
+      type=str,
       default="",
     ),
     RANGER_MAIN_USER = Config(
       key="ranger_main_user",
       help=_("ranger to modify condition base on which user, if current condition has this user, new user will add to this condition"),
-      type=coerce_string,
+      type=str,
       default="",
     )
 ))
