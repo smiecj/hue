@@ -12,6 +12,6 @@ if __name__ == '__main__':
         description="ranger api client",
         url="https://github.com/smiecj/ranger-client", 
         packages=find_packages(),
-        install_requires=['beautifulsoup4==4.9.3', 'requests==2.10.0'],
+        install_requires=['beautifulsoup4==4.9.3', 'requests==2.18.4'],
         entry_points = { 'desktop.sdk.lib': 'ranger_client=ranger_client' }
     )
