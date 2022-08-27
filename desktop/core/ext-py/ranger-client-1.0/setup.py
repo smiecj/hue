@@ -1,8 +1,5 @@
 from setuptools import setup, find_packages
 
-packages = find_packages()
-print("[test] packages: {}".format(packages))
-
 if __name__ == '__main__':
     
     setup(
