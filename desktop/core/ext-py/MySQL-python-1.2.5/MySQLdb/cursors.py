@@ -324,7 +324,17 @@ class BaseCursor(object):
     def _fetch_row(self, size=1):
         if not self._result:
             return ()
-        return self._result.fetch_row(size, self._fetch_type)
+        ret = self._result.fetch_row(size, self._fetch_type)
+        ret = list(ret)
+        for i in range(len(ret)):
+            row_tuple = ret[i]
+            row_list = list(row_tuple)
+            for r_index in range(len(row_list)):                
+                if isinstance(row_list[r_index], (int, long)):
+                    row_list[r_index] = str(row_list[r_index])
+            ret[i] = tuple(row_list)
+        ret = tuple(ret)
+        return ret
 
     def __iter__(self):
         return iter(self.fetchone, None)
