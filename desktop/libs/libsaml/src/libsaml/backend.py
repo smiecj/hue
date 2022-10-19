@@ -57,6 +57,9 @@ class SAML2Backend(_Saml2Backend):
     """
     Overrides the clean_user_main_attribute method to force case if needed
     """
+    import re
+    main_attribute = re.sub("@.*", "", main_attribute)
+    main_attribute = main_attribute.replace(".", "_")
     return force_username_case(main_attribute)
 
 
