@@ -19,6 +19,7 @@ See desktop/auth/backend.py
 """
 
 from __future__ import absolute_import
+from ast import main
 
 import logging
 
@@ -57,7 +58,12 @@ class SAML2Backend(_Saml2Backend):
     """
     Overrides the clean_user_main_attribute method to force case if needed
     """
-    main_attribute = main_attribute.replace(" ", "_")
+    # 0924: fix-get user name from email
+    ## after @ to empty
+    import re
+    main_attribute = re.sub("@.*", "", main_attribute)
+    ## dot to _
+    main_attribute = main_attribute.replace(".", "_")
     return force_username_case(main_attribute)
 
 
