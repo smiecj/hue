@@ -289,6 +289,27 @@ class LoginAndPermissionMiddleware(MiddlewareMixin):
     if request.session.get('_auth_user_backend', '') == 'desktop.auth.backend.AllowFirstUserDjangoBackend' \
         and 'desktop.auth.backend.OIDCBackend' in AUTH.BACKEND.get():
       request.session['oidc_id_token_expiration'] = time.time() + 300
+    if 'desktop.auth.backend.KnoxSpnegoDjangoBackend' in AUTH.BACKEND.get():
+      # use knox backend will auth user from 'user.name' first, like ProxyMiddleware
+      if request.GET.get('user.name'):
+        try:
+          username = request.GET.get('user.name')
+          user = authenticate(request=request, username=username)
+          if user:
+            request.user = user
+            login(request, user)
+            msg = 'Successful login for user: %s' % request.user.username
+          else:
+            msg = 'Failed login for user: %s' % request.user.username
+          request.audit = {
+            'operation': 'USER_LOGIN',
+            'username': request.user.username,
+            'operationText': msg
+          }
+          return
+        except:
+          LOG.exception('Unexpected error when authenticating')
+          return
 
   def process_view(self, request, view_func, view_args, view_kwargs):
     """

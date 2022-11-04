@@ -736,9 +736,10 @@ class KnoxSpnegoDjangoBackend(django.contrib.auth.backends.ModelBackend):
     return user
 
   def clean_username(self, username, request):
-    # Grab doAs parameter here
-    doas_user = request.GET.get("doAs", "")
-    return doas_user
+    # replace dot and space to underline
+    username = username.replace(" ", "_")
+    username = username.replace(".", "_")
+    return username
 
   def get_user(self, user_id):
     user = super(KnoxSpnegoDjangoBackend, self).get_user(user_id)
