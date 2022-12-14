@@ -743,6 +743,7 @@ class SpnegoMiddleware(MiddlewareMixin):
               access_warn(request, 'Failed to verify provided username %s with %s ' % (principal, principals))
             # If knox authentication failed then generate 401 (Unauthorized error)
             if not knox_verification:
+              LOG.info("[test] SpnegoMiddleware: not knox_verification return 401")
               request.META['Return-401'] = ''
               return
 
@@ -768,10 +769,20 @@ class SpnegoMiddleware(MiddlewareMixin):
           LOG.exception('Unexpected error when authenticating against KDC')
           return
       else:
+        LOG.info("[test] SpnegoMiddleware: not Negotiate return 401")
         request.META['Return-401'] = ''
         return
     else:
+      # auth user
+      ## 当前: 替换 preprod 环境代码、准备验证、提交代码到 github、gitlab
+      username = request.GET.get('user.name')
+      if username and username != "":
+        user = authenticate(request=request, username=username)
+        LOG.info("[test] SpnegoMiddleware: HTTP_AUTHORIZATION: user is auth: {}".format(user.is_authenticated))
+        if user:
+          request.user = user
       if not request.user.is_authenticated:
+        LOG.info("[test] SpnegoMiddleware: not HTTP_AUTHORIZATION and not auth return 401")
         request.META['Return-401'] = ''
       return
 
