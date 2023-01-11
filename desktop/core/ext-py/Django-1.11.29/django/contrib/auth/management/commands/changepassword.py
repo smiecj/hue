@@ -33,12 +33,21 @@ class Command(BaseCommand):
             default=DEFAULT_DB_ALIAS,
             help='Specifies the database to use. Default is "default".',
         )
+        parser.add_argument(
+            '--password', nargs='?',
+            default="",
+            help='Specify password, default is '' and will ask for password.',
+        )
 
     def handle(self, *args, **options):
         if options['username']:
             username = options['username']
         else:
             username = getpass.getuser()
+
+        input_password = ''
+        if options['password']:
+            input_password = options['password']
 
         try:
             u = UserModel._default_manager.using(options['database']).get(**{
@@ -54,8 +63,13 @@ class Command(BaseCommand):
         p1, p2 = 1, 2  # To make them initially mismatch.
         password_validated = False
         while (p1 != p2 or not password_validated) and count < MAX_TRIES:
-            p1 = self._get_pass()
-            p2 = self._get_pass("Password (again): ")
+            if input_password != '':
+                p1 = input_password
+                p2 = input_password
+            else:    
+                p1 = self._get_pass()
+                p2 = self._get_pass("Password (again): ")
+
             if p1 != p2:
                 self.stdout.write("Passwords do not match. Please try again.\n")
                 count += 1
