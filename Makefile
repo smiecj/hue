@@ -164,6 +164,7 @@ else ifeq ($(PYTHON_VER),python3.8)
 	  echo '--- Finished $(REQUIREMENT_FILE) into virtual-env'; \
          fi
 	@$(ENV_PIP) install $(NAVOPTAPI_WHL)
+	@$(ENV_PIP) install --upgrade --force-reinstall $(PIP3_MODULES)
 	@echo '--- Finished $(NAVOPTAPI_WHL) into virtual-env'
 	@touch $(REQUIREMENT_DOT_FILE)
 endif

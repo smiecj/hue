@@ -897,7 +897,8 @@ SESSION = ConfigSection(
       key="trusted_origins",
       help=_("A list of hosts which are trusted origins for unsafe requests. See django's CSRF_TRUSTED_ORIGINS for more information"),
       type=coerce_csv,
-      default='.cloudera.com',
+      # default='.cloudera.com',
+      default=None,
     )
   )
 )
@@ -913,7 +914,8 @@ KNOX = ConfigSection(
       default="knox/%s" % socket.getfqdn()),
     KNOX_PROXYHOSTS=Config(
       key='knox_proxyhosts',
-      default="%s" % socket.getfqdn(),
+      # default="%s" % socket.getfqdn(),
+      default=None,
       type=coerce_csv,
       help=_('Comma separated list of strings representing the host names that the Hue server can trust as knox hosts.')
     ),
